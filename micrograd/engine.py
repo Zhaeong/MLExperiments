@@ -268,6 +268,7 @@ class Value:
     # Returns another Value object of the done operation
     # with the parameters added as previous
     def __add__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
         data_value = self.data + other.data
         out = Value(data_value, (self, other), '+')
 
@@ -282,7 +283,21 @@ class Value:
         out._backward = _backward
         return out
 
+    def __radd__(self, other):
+        return self + other
+
+    def __neg__(self): # -self
+        return self * -1
+
+    def __sub__(self, other): # self - other
+        return self + (-other)
+
+    def __rsub__(self, other): # other - self
+        return other + (-self)
+
+
     def __mul__(self, other):
+        other = other if isinstance(other, Value) else Value(other)
         data_value = self.data * other.data
         out = Value(data_value, (self, other), '*')
 
