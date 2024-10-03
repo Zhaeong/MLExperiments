@@ -57,6 +57,7 @@ class MultiLayerPerceptron:
         layer_list = []
         # iterate over consequtive sizes and create layers for them
         for i in range(len(num_neurons_list)):
+            print("Layer inputs:" + str(layers[i]) + " neurons:" + str(layers[i+1]))
             layer_list.append(NeuronLayer(layers[i], layers[i+1]))
         self.layers = layer_list
 
@@ -128,7 +129,7 @@ if __name__ == "__main__":
 
 
     # training loop
-    steps = 1000
+    steps = 10
     for k in range(steps):
         # forward
         ypred = [MLP(x) for x in xs]
