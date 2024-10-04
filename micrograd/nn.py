@@ -62,7 +62,11 @@ class MultiLayerPerceptron:
         self.layers = layer_list
 
     def __call__(self, x):
+        print("layer inputs")
         for layer in self.layers:
+            # note x is updated to be the output of this layer
+            # so each layer is called with the output of previous layer
+            # this is for the forward pass
             x = layer(x)
         return x
 
@@ -102,6 +106,7 @@ if __name__ == "__main__":
     # current predictions of model based on inputs
     ypred = [MLP(x) for x in xs]
 
+    print("ypred")
     print(ypred)
 
     # loss is single number that measures how well the neural net is performing
@@ -127,6 +132,7 @@ if __name__ == "__main__":
         params.data += -0.1 * params.grad
 
 
+    exit()
 
     # training loop
     steps = 10
@@ -154,7 +160,7 @@ if __name__ == "__main__":
         for params in MLP.parameters():
             params.data += -0.1 * params.grad
 
-        print(k, loss.data)
+        #print(k, loss.data)
 
     print(ypred)
 
