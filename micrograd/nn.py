@@ -68,6 +68,8 @@ class MultiLayerPerceptron:
             # so each layer is called with the output of previous layer
             # this is for the forward pass
             x = layer(x)
+        # last layer is usually set to have 1 neuron, so it can be called via backward for 
+        # back prop
         return x
 
     def parameters(self):
