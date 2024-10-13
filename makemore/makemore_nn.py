@@ -64,6 +64,11 @@ def gradient_descent():
         num_inputs = bigram_start.nelement()
         loss = -probabilities[torch.arange(num_inputs), bigram_end].log().mean()
 
+        # we can regularize the loss function (model smoothing)
+        # this value tries to make all weights to 0
+        regularization_value = 0.01 * (weights ** 2).sum()
+        # loss += regularization_value
+
         print("loss: ", loss.item())
 
         # backwards pass
@@ -75,11 +80,40 @@ def gradient_descent():
         # to reduce loss, we subtract based on gradients 
         learning_rate = 50 
         weights.data += -learning_rate * weights.grad
+
+    return weights
 if __name__ == "__main__":
 
+    weights = gradient_descent()
 
-    gradient_descent()
+    g = torch.Generator().manual_seed(2147483647)
+    # sampling from neural net
+    for i in range(5):
+        start_index = 0 
+        next_char = ''
+        name_prediction = ''
+        while next_char != '.':
+            # encode
+            # note, put the encoding inside a list, so that the output tensors will have shape
+            # so probabilities will be able to be normalized across dimension 1
+            index_tensor = torch.tensor([start_index])
+            encoded_index = torchF.one_hot(index_tensor, num_classes=27).float()
 
+            # forward pass
+            next_logit = encoded_index @ weights
+            # softmax
+            counts = next_logit.exp()
+            # this step won't work unless start_index is encoded as list
+            probabilities = counts / counts.sum(1, keepdim=True)
+
+            # sample from prob distribution
+            start_index = torch.multinomial(probabilities, num_samples=1, replacement=True, generator=g).item()
+            next_char = index_to_string[start_index]
+            name_prediction += next_char
+        print(name_prediction)
+            
+    
+    # name predictions should be same as bigram model before
     exit()
 
     # Use one-hot encoding to turn the inputs (integers) into vectors which turns the integer dimension into 1
