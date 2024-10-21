@@ -34,5 +34,10 @@ if __name__ == "__main__":
     for w in words[:5]:
         print(w)
 
+    # first arg is row, which is the same as list,
+    # second is columns, which is the indexes in the list
+    # 2, 3:
+    # [[0,0,0],
+    #  [0,0,0]]
     tester = torch.ones(32, 3)
     print(tester)
