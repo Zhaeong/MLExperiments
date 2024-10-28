@@ -79,7 +79,7 @@ def training():
     for p in parameters:
         p.requires_grad = True
 
-    for i in range(100):
+    for i in range(1000):
 
         # minibatch, so sample just a random number of input -> labels
         examples_used = 32
@@ -118,12 +118,33 @@ def evaluate_loss(parameters):
     
     print("Full dataset loss:", loss.item())
 
+def generate_samples(parameters, num_samples):
+    for i in range(num_samples):
+        output = ''
+        context = [0] * block_size
+
+        while True:
+            embedding = parameters[0][context]
+            emb_cat = embedding.view(-1, 6)
+            hidden_states = torch.tanh(emb_cat @ parameters[1] + parameters[2])
+            logits = hidden_states @ parameters[3] + parameters[4]
+            probabilities = torchF.softmax(logits, dim=1)
+            ix = torch.multinomial(probabilities, num_samples=1).item()
+            context = context[1:] + [ix]
+            output += index_to_string[ix]
+            if(ix == 0):
+                break
+        print(output)
+
+
 if __name__ == "__main__":
     print("Start")
     
     params = training()
 
     evaluate_loss(params)
+
+    generate_samples(params, 20)
     exit()
 
 
