@@ -32,8 +32,8 @@ labels = []
 # context length: how many char do we need to predict the next one
 block_size = 3
 
-for w in words[:5]:
-    print(w)
+for w in words:
+    #print(w)
 
     # 0 is the index for beginning or end char '.'
     # so start context with list of dots
@@ -46,7 +46,7 @@ for w in words[:5]:
         inputString = ''
         for i in context:
             inputString += index_to_string[i]
-        print("input:", inputString, context, "Prediction:", index_to_string[char_index], char_index)
+        #print("input:", inputString, context, "Prediction:", index_to_string[char_index], char_index)
 
         # increment to next char, crop list and append next
         context = context[1:] + [char_index]
@@ -58,10 +58,11 @@ for w in words[:5]:
 inputs = torch.tensor(inputs)
 labels = torch.tensor(labels)
 
+# a mapping of character to 2D vectors
+CharLookupTable = torch.randn((27, 2))
 def training():
 
     # forward pass
-    CharLookupTable = torch.randn((27, 2))
     neurons = 100
 
     # hidden layer
@@ -78,13 +79,18 @@ def training():
     for p in parameters:
         p.requires_grad = True
 
-    for i in range(10):
-        embedding = CharLookupTable[inputs]
+    for i in range(100):
+
+        # minibatch, so sample just a random number of input -> labels
+        examples_used = 32
+        ix = torch.randint(0, inputs.shape[0], (examples_used,))
+
+        embedding = CharLookupTable[inputs[ix]]
         emb_cat = embedding.view(-1, 6)
         hidden_states = torch.tanh(emb_cat @ weights_1 + biases_1)
         logits = hidden_states @ weights_2 + biases_2
     
-        loss = torchF.cross_entropy(logits, labels)
+        loss = torchF.cross_entropy(logits, labels[ix])
     
         print(loss.item())
     
@@ -98,13 +104,26 @@ def training():
         for p in parameters:
             p.data += -learning_rate * p.grad
     
+    return parameters
 
+def evaluate_loss(parameters):
+
+    # indices based on parameters = [CharLookupTable, weights_1, biases_1, weights_2, biases_2]
+    embedding = parameters[0][inputs]
+    emb_cat = embedding.view(-1, 6)
+    hidden_states = torch.tanh(emb_cat @ parameters[1] + parameters[2])
+    logits = hidden_states @ parameters[3] + parameters[4]
+    
+    loss = torchF.cross_entropy(logits, labels)
+    
+    print("Full dataset loss:", loss.item())
 
 if __name__ == "__main__":
     print("Start")
     
-    training()
+    params = training()
 
+    evaluate_loss(params)
     exit()
 
 
