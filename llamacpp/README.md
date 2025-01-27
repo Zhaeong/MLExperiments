@@ -1,0 +1,1 @@
+CMAKE_ARGS="-DGGML_VULKAN=on" pip install llama-cpp-python
